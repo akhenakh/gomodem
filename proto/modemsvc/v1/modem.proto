@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package modem.v1;
+option go_package = "github.com/akhenakh/gomodem/proto/modemsvc/v1";
+
+service ModemService {
+  // Transmit a packet through the audio device
+  rpc Transmit (TransmitRequest) returns (TransmitResponse);
+  
+  // Stream received packets
+  rpc Receive (ReceiveRequest) returns (stream Packet);
+}
+
+enum Protocol {
+  AX25 = 0;
+  FX25 = 1;
+  IL2P = 2;
+}
+
+message TransmitRequest {
+  string from_callsign = 1;
+  string to_callsign = 2;
+  repeated string path = 3;
+  bytes payload = 4;
+  Protocol protocol = 5;
+  int32 baud_rate = 6;     // 300, 1200, 2400, 9600
+  string audio_target = 7; // e.g., "wav:output.wav", "tcp:127.0.0.1:8080", "alsa:hw:0,0"
+}
+
+message TransmitResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ReceiveRequest {
+  string audio_source = 1;
+  int32 baud_rate = 2;
+}
+
+message Packet {
+  string from_callsign = 1;
+  string to_callsign = 2;
+  bytes payload = 3;
+  Protocol protocol = 4;
+}
