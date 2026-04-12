@@ -42,11 +42,11 @@ func (s *ModemServer) Transmit(ctx context.Context, req *pb.TransmitRequest) (*p
 	var outStream audio.Stream
 	var err error
 
-	if strings.HasPrefix(req.AudioTarget, "wav:") {
-		filename := strings.TrimPrefix(req.AudioTarget, "wav:")
+	if after, ok := strings.CutPrefix(req.AudioTarget, "wav:"); ok {
+		filename := after
 		outStream, err = audio.NewWAVAudioStream(filename, 44100)
-	} else if strings.HasPrefix(req.AudioTarget, "tcp:") {
-		address := strings.TrimPrefix(req.AudioTarget, "tcp:")
+	} else if after0, ok0 := strings.CutPrefix(req.AudioTarget, "tcp:"); ok0 {
+		address := after0
 		outStream, err = audio.NewTCPAudioStream(address)
 	} else {
 		return nil, fmt.Errorf("unsupported audio target: %s", req.AudioTarget)
@@ -64,7 +64,10 @@ func (s *ModemServer) Transmit(ctx context.Context, req *pb.TransmitRequest) (*p
 	// Create a reader to sequentially process bits using gomem
 	reader := bitstream.NewReader()
 
-	var audioBuf []float64
+	bitstreamSize := bitstream.Size
+	samplesPerBitEst := 44100 / int(req.BaudRate)
+	estimatedSamples := bitstreamSize * samplesPerBitEst
+	audioBuf := make([]float64, 0, estimatedSamples)
 
 	for {
 		b, err := reader.ReadByte()
@@ -73,7 +76,7 @@ func (s *ModemServer) Transmit(ctx context.Context, req *pb.TransmitRequest) (*p
 		}
 
 		samplesPerBit := afsk.NextSamplesPerBit()
-		for i := 0; i < samplesPerBit; i++ {
+		for range samplesPerBit {
 			samp := afsk.Modulate(b)
 			audioBuf = append(audioBuf, samp)
 		}
