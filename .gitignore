@@ -27,3 +27,4 @@ go.work.sum
 dist/
 cmd/atest/atest
 cmd/modemd/modemd
+modem/test.wav

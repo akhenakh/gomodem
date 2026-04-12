@@ -37,7 +37,7 @@ func (enc *AX25Encoder) Encode(from, to string, payload []byte) gomem.Memory {
 		}
 	}
 
-	// 4. Bit Stuffing (Insert 0 after five consecutive 1s)
+	// Bit Stuffing (Insert 0 after five consecutive 1s)
 	var stuffedBits []byte
 	onesCount := 0
 	for _, b := range frameBits {
@@ -55,11 +55,11 @@ func (enc *AX25Encoder) Encode(from, to string, payload []byte) gomem.Memory {
 
 	// Wrap with HDLC Flags (0x7E = 01111110 LSB first)
 	var fullBits []byte
-	for range 10 { // Preamble flags
+	for range 50 { // Preamble flags (approx 333ms TXDELAY for receiver PLL sync)
 		fullBits = append(fullBits, 0, 1, 1, 1, 1, 1, 1, 0)
 	}
 	fullBits = append(fullBits, stuffedBits...)
-	for range 2 { // Postamble flags
+	for range 5 { // Postamble flags
 		fullBits = append(fullBits, 0, 1, 1, 1, 1, 1, 1, 0)
 	}
 

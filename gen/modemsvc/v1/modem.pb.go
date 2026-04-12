@@ -24,22 +24,25 @@ const (
 type Protocol int32
 
 const (
-	Protocol_AX25 Protocol = 0
-	Protocol_FX25 Protocol = 1
-	Protocol_IL2P Protocol = 2
+	Protocol_PROTOCOL_UNSPECIFIED Protocol = 0
+	Protocol_PROTOCOL_AX25        Protocol = 1
+	Protocol_PROTOCOL_FX25        Protocol = 2
+	Protocol_PROTOCOL_IL2P        Protocol = 3
 )
 
 // Enum value maps for Protocol.
 var (
 	Protocol_name = map[int32]string{
-		0: "AX25",
-		1: "FX25",
-		2: "IL2P",
+		0: "PROTOCOL_UNSPECIFIED",
+		1: "PROTOCOL_AX25",
+		2: "PROTOCOL_FX25",
+		3: "PROTOCOL_IL2P",
 	}
 	Protocol_value = map[string]int32{
-		"AX25": 0,
-		"FX25": 1,
-		"IL2P": 2,
+		"PROTOCOL_UNSPECIFIED": 0,
+		"PROTOCOL_AX25":        1,
+		"PROTOCOL_FX25":        2,
+		"PROTOCOL_IL2P":        3,
 	}
 )
 
@@ -145,7 +148,7 @@ func (x *TransmitRequest) GetProtocol() Protocol {
 	if x != nil {
 		return x.Protocol
 	}
-	return Protocol_AX25
+	return Protocol_PROTOCOL_UNSPECIFIED
 }
 
 func (x *TransmitRequest) GetBaudRate() int32 {
@@ -331,7 +334,7 @@ func (x *Packet) GetProtocol() Protocol {
 	if x != nil {
 		return x.Protocol
 	}
-	return Protocol_AX25
+	return Protocol_PROTOCOL_UNSPECIFIED
 }
 
 var File_modemsvc_v1_modem_proto protoreflect.FileDescriptor
@@ -359,11 +362,12 @@ const file_modemsvc_v1_modem_proto_rawDesc = "" +
 	"\vto_callsign\x18\x02 \x01(\tR\n" +
 	"toCallsign\x12\x18\n" +
 	"\apayload\x18\x03 \x01(\fR\apayload\x12.\n" +
-	"\bprotocol\x18\x04 \x01(\x0e2\x12.modem.v1.ProtocolR\bprotocol*(\n" +
-	"\bProtocol\x12\b\n" +
-	"\x04AX25\x10\x00\x12\b\n" +
-	"\x04FX25\x10\x01\x12\b\n" +
-	"\x04IL2P\x10\x022\x8a\x01\n" +
+	"\bprotocol\x18\x04 \x01(\x0e2\x12.modem.v1.ProtocolR\bprotocol*]\n" +
+	"\bProtocol\x12\x18\n" +
+	"\x14PROTOCOL_UNSPECIFIED\x10\x00\x12\x11\n" +
+	"\rPROTOCOL_AX25\x10\x01\x12\x11\n" +
+	"\rPROTOCOL_FX25\x10\x02\x12\x11\n" +
+	"\rPROTOCOL_IL2P\x10\x032\x8a\x01\n" +
 	"\fModemService\x12A\n" +
 	"\bTransmit\x12\x19.modem.v1.TransmitRequest\x1a\x1a.modem.v1.TransmitResponse\x127\n" +
 	"\aReceive\x12\x18.modem.v1.ReceiveRequest\x1a\x10.modem.v1.Packet0\x01B/Z-github.com/akhenakh/gomodem/proto/modemsvc/v1b\x06proto3"

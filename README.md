@@ -2,6 +2,8 @@
 
 gomodem is a software-defined modem service providing gRPC-based modulation and demodulation for packet radio.
 
+The modem library is fully functional, the tools are work in progress.
+
 ## Technical Overview
 
 The project implements a digital signal processing (DSP) pipeline for converting bitstreams to audio (modulation) and audio back to bitstreams (demodulation), targeting amateur radio packet standards.
@@ -10,7 +12,7 @@ It can be used as a library or as a server.
 
 ### Modulation
 - **AFSK**: Direct Digital Synthesis (DDS) AFSK modulation with optional transition smoothing.
-- **GFSK**: Gaussian Frequency Shift Keying using a Gaussian lowpass FIR filter (G3RUH standard).
+- **GFSK**: Gaussian Frequency Shift Keying using a Gaussian lowpass FIR filter (G3RUH standard, sometimes called GMSK but it is really just GFSK because the modulation index is not exactly 0.5.)
 - **Sine FSK**: Half-cosine transition modulation.
 - **Supported Baud Rates**: 300, 1200, 2400, 9600.
 
@@ -46,3 +48,13 @@ The `ModemService` gRPC interface provides:
 go run cmd/modemd/main.go
 ```
 The server listens on port `50051` by default.
+
+
+## Testing against Direwolf
+
+```sh
+go test -v ./...
+cd testdata
+sox ../modem/test.wav -t raw -r 44100 -e signed-integer -b 16 -c 1 - \
+  | direwolf -r 44100 -n 1 -b 16 -
+```

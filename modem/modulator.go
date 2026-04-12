@@ -26,6 +26,7 @@ type AFSKModulator struct {
 	SampleRate    int
 	BaudRate      int
 	Alpha         float64
+	Volume        float64
 
 	freqSmooth    float64
 	phase         float64
@@ -40,7 +41,8 @@ func NewAFSKModulator(sampleRate, baudRate int, fMark, fSpace float64) *AFSKModu
 		FSpace:        fSpace,
 		SampleRate:    sampleRate,
 		BaudRate:      baudRate,
-		Alpha:         1.0, // Set < 1.0 for transition smoothing
+		Alpha:         0.5,  // Reduced for smoother transitions (less HF splatter)
+		Volume:        0.25, // Adjusted to match typical reference volume (~50 direwolf level)
 		freqSmooth:    fMark,
 		samplesPerBit: float64(sampleRate) / float64(baudRate),
 	}
@@ -55,7 +57,9 @@ func (m *AFSKModulator) Modulate(bit byte) float64 {
 	m.freqSmooth = m.Alpha*targetFreq + (1.0-m.Alpha)*m.freqSmooth
 	m.phase = math.Mod(m.phase+2.0*math.Pi*m.freqSmooth/float64(m.SampleRate), 2.0*math.Pi)
 
-	return math.Cos(m.phase)
+	// math.Sin instead of math.Cos guarantees the signal will cleanly start at 0
+	// rather than full amplitude, eliminating key-up transient clicks.
+	return math.Sin(m.phase) * m.Volume
 }
 
 func (m *AFSKModulator) NextSamplesPerBit() int {
@@ -81,6 +85,7 @@ type GFSKModulator struct {
 	delayPos      int
 	samplesPerBit float64
 	samplesErr    float64
+	Volume        float64
 }
 
 // NewGFSKModulator creates a 9600 baud standard G3RUH modulator with BT=0.5.
@@ -101,6 +106,7 @@ func NewGFSKModulator(sampleRate, baudRate int, bt float64) *GFSKModulator {
 		delayLine:     make([]float64, nTaps),
 		firTaps:       nTaps,
 		samplesPerBit: samplesPerBit,
+		Volume:        0.25,
 	}
 
 	// Calculate Gaussian FIR coefficients
@@ -145,7 +151,7 @@ func (m *GFSKModulator) Modulate(bit byte) float64 {
 		m.delayPos = 0
 	}
 
-	return output
+	return output * m.Volume
 }
 
 func (m *GFSKModulator) NextSamplesPerBit() int {
@@ -194,6 +200,7 @@ type SineFSKModulator struct {
 	transitioning   bool
 	samplesPerBit   float64
 	samplesErr      float64
+	Volume          float64
 }
 
 // NewSineFSKModulator creates an FSK modulator that uses a half-cosine transition.
@@ -211,6 +218,7 @@ func NewSineFSKModulator(sampleRate, baudRate int) *SineFSKModulator {
 		level:           1.0,
 		currentBitSamps: n,
 		samplesPerBit:   samplesPerBit,
+		Volume:          0.25,
 	}
 }
 
@@ -258,7 +266,7 @@ func (m *SineFSKModulator) Modulate(bit byte) float64 {
 		m.sampleIndex = 0
 	}
 
-	return output
+	return output * m.Volume
 }
 
 func (m *SineFSKModulator) NextSamplesPerBit() int {

@@ -30,11 +30,14 @@ func (s *ModemServer) Transmit(ctx context.Context, req *pb.TransmitRequest) (*p
 	// Encode packet to bitstream
 	var bitstream gomem.Memory
 	switch req.Protocol {
-	case pb.Protocol_AX25:
+	case pb.Protocol_PROTOCOL_AX25:
 		encoder := protocols.NewAX25Encoder(s.allocator)
 		bitstream = encoder.Encode(req.FromCallsign, req.ToCallsign, req.Payload)
-	case pb.Protocol_FX25, pb.Protocol_IL2P:
-		// Placeholders for FX25 (Reed Solomon) and IL2P (Galois Scrambler)
+	case pb.Protocol_PROTOCOL_FX25:
+		encoder := protocols.NewFX25Encoder(s.allocator)
+		bitstream = encoder.Encode(req.FromCallsign, req.ToCallsign, req.Payload)
+	case pb.Protocol_PROTOCOL_IL2P:
+		// Placeholder for IL2P (Galois Scrambler)
 		return nil, fmt.Errorf("protocol %v not fully implemented in this example", req.Protocol)
 	}
 

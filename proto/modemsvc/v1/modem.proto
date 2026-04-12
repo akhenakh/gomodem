@@ -12,9 +12,10 @@ service ModemService {
 }
 
 enum Protocol {
-  AX25 = 0;
-  FX25 = 1;
-  IL2P = 2;
+  PROTOCOL_UNSPECIFIED = 0;
+  PROTOCOL_AX25 = 1;
+  PROTOCOL_FX25 = 2;
+  PROTOCOL_IL2P = 3;
 }
 
 message TransmitRequest {

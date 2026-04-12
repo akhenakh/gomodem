@@ -89,11 +89,12 @@ func TestAFSK1200LoopbackAPRS(t *testing.T) {
 
 	var audioBuffer []float64
 
-	// Add key-up delay (300ms of silence for receiver synchronization)
+	// Add key-up delay (300ms of silence for channel idle simulation)
 	keyUpDelay := sampleRate / 10 * 3 // ~300ms
 	for range keyUpDelay {
 		audioBuffer = append(audioBuffer, 0.0)
 	}
+
 	for _, nrziBit := range bitstream {
 		// API Contract: mod.NextSamplesPerBit() tells us exactly how many audio samples
 		// to generate for this specific bit to prevent fractional drift.
@@ -105,6 +106,12 @@ func TestAFSK1200LoopbackAPRS(t *testing.T) {
 		}
 	}
 
+	// Add tail silence to flush audio buffers in external streaming decoders (like direwolf)
+	tailDelay := sampleRate / 10 * 2 // ~200ms
+	for range tailDelay {
+		audioBuffer = append(audioBuffer, 0.0)
+	}
+
 	var maxAmp float64
 	for _, s := range audioBuffer {
 		if s < 0 {
@@ -114,7 +121,7 @@ func TestAFSK1200LoopbackAPRS(t *testing.T) {
 			maxAmp = s
 		}
 	}
-	t.Logf("Max amplitude: %.4f (should be ~0.8–1.0)", maxAmp)
+	t.Logf("Max amplitude: %.4f (should be ~0.25)", maxAmp)
 	t.Logf("Total audio samples: %d (%.2f seconds)", len(audioBuffer), float64(len(audioBuffer))/float64(sampleRate))
 
 	if maxAmp == 0 || maxAmp > 1.01 {

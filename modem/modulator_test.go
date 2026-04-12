@@ -25,13 +25,13 @@ func TestModulatorBaudRates(t *testing.T) {
 		t.Run("BaudRate_"+string(rune(tt.baudRate)), func(t *testing.T) {
 			mod := modem.NewModulatorByBaud(sampleRate, tt.baudRate)
 
-			// 1. Verify we got the correct type from the factory
+			// Verify we got the correct type from the factory
 			actualType := fmt.Sprintf("%T", mod)
 			if actualType != tt.expectedType {
 				t.Errorf("Expected modulator type %s for %d baud, got %s", tt.expectedType, tt.baudRate, actualType)
 			}
 
-			// 2. Ensure fractional sample accumulation doesn't drift
+			// Ensure fractional sample accumulation doesn't drift
 			// e.g. 48000/1200 = 40 (exact)
 			// e.g. 44100/1200 = 36.75 (fractional)
 			totalSamples := 0
@@ -40,7 +40,7 @@ func TestModulatorBaudRates(t *testing.T) {
 				totalSamples += samplesForBit
 
 				// Pump the bits through to ensure it doesn't panic
-				for i := 0; i < samplesForBit; i++ {
+				for range samplesForBit {
 					val := mod.Modulate(bit)
 
 					// Basic bound checks (-1.0 to 1.0 amplitude)
@@ -72,10 +72,10 @@ func TestSineFSKModulator(t *testing.T) {
 	samples := mod.NextSamplesPerBit()
 
 	// A steady bit should maintain level
-	for i := 0; i < samples; i++ {
+	for range samples {
 		val := mod.Modulate(1)
-		if val != 1.0 {
-			t.Errorf("Sine FSK steady 1 output should be 1.0, got %f", val)
+		if val != 0.25 {
+			t.Errorf("Sine FSK steady 1 output should be 0.25, got %f", val)
 		}
 	}
 }
